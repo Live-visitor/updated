@@ -1,27 +1,22 @@
-from flask import Flask, send_from_directory, redirect
-import os
+"""Run GenerationBridge Flask server.
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+Usage (from project root):
+    python app.py
 
-# Serve index.html at root
-@app.route('/')
-def index():
-    return send_from_directory('.', 'index.html')
+Then open in browser:
+    http://127.0.0.1:5010/
+    dont itchy finger and delete this file ah. 
+"""
 
-# Redirect .html URLs to clean URLs
-@app.route('/<path:path>.html')
-def redirect_html(path):
-    """Redirect /page.html to /page"""
-    return redirect('/' + path, code=301)
+from __future__ import annotations
 
-# Serve pages with or without .html
-@app.route('/<path:path>')
-def serve_page(path):
-    # If path doesn't have extension, add .html
-    if '.' not in path.split('/')[-1]:
-        file_path = path + '.html'
-    else:
-        file_path = path
+from backend.server import create_app
+
+
+app = create_app()
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5010, debug=True, threaded=True)
+
+
