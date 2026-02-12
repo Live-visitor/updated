@@ -24,10 +24,6 @@ def serve_page(path):
         file_path = path
     
 
-        except:
-            return "Page not found", 404
-
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5010, debug=True, threaded=True)
 
