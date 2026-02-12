@@ -6,11 +6,27 @@ app = Flask(__name__, static_folder=".", static_url_path="")
 
 DB_FILE = "app.db"
 
+# ======================
+# AUTO-CREATE DATABASE IF MISSING
+# ======================
+def init_db():
+    if not os.path.exists(DB_FILE):
+        conn = sqlite3.connect(DB_FILE)
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL
+            )
+        """)
+        conn.commit()
+        conn.close()
+
+init_db()
 
 # ======================
 # DATABASE FUNCTIONS
 # ======================
-
 def get_db_connection():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
@@ -29,7 +45,7 @@ def query_db(query, params=(), fetch=False):
     return results
 
 # ======================
-# STATIC HTML ROUTES
+# STATIC HTML ROUTES (CLEAN URLs)
 # ======================
 
 @app.route("/")
@@ -43,11 +59,11 @@ def redirect_html(path):
 
 @app.route("/<path:path>")
 def serve_page(path):
-    # ignore API routes
+    # Ignore API routes
     if path.startswith("api/"):
         return "Not found", 404
 
-    # add .html automatically
+    # Add .html automatically if missing
     if "." not in path.split("/")[-1]:
         path += ".html"
 
@@ -63,18 +79,15 @@ def serve_page(path):
 # BACKEND / DATABASE APIs
 # ======================
 
-# Example: add a user
 @app.route("/api/users", methods=["POST"])
 def add_user():
     data = request.json
     name = data.get("name")
     if not name:
         return {"status": "error", "message": "Name is required"}, 400
-
     query_db("INSERT INTO users (name) VALUES (?)", (name,))
     return {"status": "success"}
 
-# Example: get all users
 @app.route("/api/users", methods=["GET"])
 def get_users():
     rows = query_db("SELECT * FROM users", fetch=True)
@@ -82,8 +95,10 @@ def get_users():
     return jsonify(users)
 
 # ======================
-# RUN SERVER
+# RUN SERVER (Render)
 # ======================
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 10000))
+    )
