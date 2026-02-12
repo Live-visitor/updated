@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Stories - Admin - GenerationBridge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    
+</head>
+
+<body class="youth-mode">
+    <nav>
+        <div class="nav-container">
+            <a href="adminhome.html" class="logo">GenerationBridge Admin</a>
+            <ul class="nav-links">
+                <li><a href="adminhome.html" class="nav-link">Dashboard</a></li>
+                <li><a href="adminmatch.html" class="nav-link">Manage Users</a></li>
+                <li><a href="adminskillswap.html" class="nav-link">Manage Skills</a></li>
+                <li><a href="adminstories.html" class="nav-link active">Manage Stories</a></li>
+                <li><a href="adminevents.html" class="nav-link">Manage Events</a></li>
+                <li><a href="adminsettings.html" class="nav-link">Settings</a></li>
+            </ul>
+            <div class="nav-actions-right">
+                <div class="mode-toggle" onclick="toggleMode()">
+                    <span class="mode-label">Youth</span>
+                    <div class="toggle-switch">
+                        <div class="toggle-slider"></div>
+                    </div>
+                    <span class="mode-label">Senior</span>
+                </div>
+                <div class="profile-dropdown-container">
+                    <button class="profile-icon-btn" onclick="toggleProfileDropdown()">
+                        <span>👤</span>
+                    </button>
+                    <div class="profile-dropdown" id="profile-dropdown">
+                        <div class="profile-header">
+                            <div class="profile-avatar-large">🛡️</div>
+                            <div class="profile-name">Admin User</div>
+                            <div class="profile-email" data-bind="profile-email"></div>
+                        </div>
+                        <div class="profile-bio" data-bind="profile-bio"></div>
+                        <div class="profile-actions">
+                            <button class="profile-btn profile-btn-logout" onclick="handleAdminLogout()">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <h2>Manage Stories</h2>
+        <p class="mb-3">Review and moderate community stories and challenges</p>
+
+        <h3 class="mb-3">Ongoing Challenges</h3>
+        <div class="grid grid-3" id="adminOngoingGrid">
+            <div class="empty-state">No ongoing stories to moderate.</div>
+        </div>
+
+        <h3 class="mb-3 mt-4">Resolved Challenges</h3>
+        <div class="grid grid-3" id="adminResolvedGrid">
+            <div class="card empty-state">
+                <h3>No resolved stories yet</h3>
+                <p class="mb-2">Resolved stories will appear here.</p>
+            </div>
+
+
+        </div>
+    </main>
+    <script src="js/classes/StateManager.js"></script>
+    <script src="js/classes/ModeToggle.js"></script>
+    <script src="js/classes/AccessibilityManager.js"></script>
+    <script src="js/classes/SettingsManager.js"></script>
+    <script src="js/classes/ProfileManager.js"></script>
+    <script src="js/classes/NavigationManager.js"></script>
+    <script src="js/classes/GenerationBridgeApp.js"></script>
+    <script src="admin.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Story - GenerationBridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="youth-mode" data-page="storiesform">
+  <div class="mode-toggle-corner">
+    <div class="mode-toggle" onclick="toggleMode()">
+      <span class="mode-label">Youth</span>
+      <div class="toggle-switch">
+        <div class="toggle-slider"></div>
+      </div>
+      <span class="mode-label">Senior</span>
+    </div>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="logo-header">
+        <a href="stories.html" class="logo">GenerationBridge</a>
+      </div>
+
+      <h1>Create Story</h1>
+      <p class="subtitle">Share an ongoing challenge and get advice from others.</p>
+
+      <div class="error-message" id="errorMessage"></div>
+      <div class="success-message" id="successMessage"></div>
+
+      <form id="StoriesPostForm" onsubmit="handleCreateStory(event)">
+        <div class="form-group">
+          <label for="storyTag">Tags</label>
+          <select id="storyTag" name="storyTag" required>
+            <option value="">Select a tag</option>
+            <option value="daytoday">Day-To-Day</option>
+            <option value="tradition">Tradition</option>
+            <option value="career">Career</option>
+            <option value="untagged">Others</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="storyTitle">Story Title</label>
+          <input type="text" id="storyTitle" name="storyTitle" required />
+        </div>
+
+        <div class="form-group">
+          <label for="storyContent">Description</label>
+          <textarea
+            id="storyContent"
+            name="storyContent"
+            required
+            placeholder="Tell us about your ongoing challenge"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-btn">Post</button>
+      </form>
+
+      <div class="switch-auth">
+        Back to Stories? <a href="stories.html">Go to Stories</a>
+      </div>
+    </div>
+  </div>
+
+  
+  <script src="js/classes/StateManager.js"></script>
+  <script src="js/classes/ModeToggle.js"></script>
+  <script src="js/classes/AccessibilityManager.js"></script>
+  <script src="js/classes/SettingsManager.js"></script>
+  <script src="js/classes/GenerationBridgeApp.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    async function handleCreateStory(event) {
+      event.preventDefault();
+
+      const errorEl = document.getElementById('errorMessage');
+      const successEl = document.getElementById('successMessage');
+      if (errorEl) errorEl.textContent = '';
+      if (successEl) successEl.textContent = '';
+
+      const category = (document.getElementById('storyTag')?.value || '').trim();
+      const title = (document.getElementById('storyTitle')?.value || '').trim();
+      const content = (document.getElementById('storyContent')?.value || '').trim();
+
+      if (!category || !title || !content) {
+        if (errorEl) errorEl.textContent = 'Please fill in Tag, Story Title, and Description.';
+        return;
+      }
+
+      // Force "Ongoing challenges" behavior: status always ongoing.
+      const status = 'ongoing';
+
+      try {
+        const res = await fetch('/api/stories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content, category, status })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data?.ok) {
+          if (data?.error === 'auth_required') {
+            window.location.href = 'login.html?next=storiesform.html';
+            return;
+          }
+          if (errorEl) errorEl.textContent = 'Unable to post story. Please try again.';
+          return;
+        }
+
+        if (successEl) successEl.textContent = 'Story posted. Redirecting to Stories...';
+        window.location.href = 'stories.html';
+      } catch (e) {
+        if (errorEl) errorEl.textContent = 'Network error. Please try again.';
+      }
+    }
+  </script>
+</body>
+</html>

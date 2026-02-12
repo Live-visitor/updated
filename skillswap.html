@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSwap - GenerationBridge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="youth-mode" data-page="skillswap">
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">GenerationBridge</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="chatbot.html" class="nav-link">AI Chat</a></li>
+                <li><a href="translator.html" class="nav-link">Translator</a></li>
+                <li><a href="match.html" class="nav-link">Match-Up</a></li>
+                <li><a href="skillswap.html" class="nav-link">SkillSwap</a></li>
+                <li><a href="stories.html" class="nav-link">Stories</a></li>
+                <li><a href="events.html" class="nav-link">Events</a></li>
+                <li><a href="messages.html" class="nav-link active">Messages</a></li>
+                <li><a href="settings.html" class="nav-link">Settings</a></li>
+            </ul>
+<div class="nav-actions-right">
+    <div class="mode-toggle" onclick="toggleMode()">
+        <span class="mode-label">Youth</span>
+        <div class="toggle-switch">
+            <div class="toggle-slider"></div>
+        </div>
+        <span class="mode-label">Senior</span>
+    </div>
+    <div class="notification-dropdown-container">
+        <button class="nav-icon-btn" id="notifications-toggle" onclick="toggleNotificationDropdown()">
+            <span class="nav-icon">🔔</span>
+            <span class="notification-badge" id="notificationBadge"></span>
+        </button>
+        <div class="dropdown-content" id="notification-dropdown">
+            <div class="dropdown-header">
+                <h4>Notifications</h4>
+                <a href="#" onclick="clearNotifications()">Clear All</a>
+            </div>
+            <div class="dropdown-list" id="dropdown-notification-list">
+            </div>
+        </div>
+    </div>
+    <div class="profile-dropdown-container">
+        <button class="profile-icon-btn" onclick="toggleProfileDropdown()">
+            <span>👤</span>
+        </button>
+        <div class="profile-dropdown" id="profile-dropdown">
+            <div class="profile-header">
+                <div class="profile-avatar-large">👤</div>
+                <div class="profile-name" data-bind="profile-name">Guest</div>
+                <div class="profile-email" data-bind="profile-email"></div>
+            </div>
+            <div class="profile-bio" data-bind="profile-bio"></div>
+            <div class="profile-actions">
+                <button class="profile-btn profile-btn-edit" onclick="window.location.href='profile.html'">Edit Profile</button>
+                <button class="profile-btn profile-btn-logout" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
+</div>
+    </nav>
+
+    <main>
+        <h2>SkillSwap</h2>
+        <p class="mb-3">Exchange knowledge and learn from each other's expertise.</p>
+        
+        <div class="filter-bar" id="skillFilterBar">
+            <button class="filter-btn active" data-filter="all" onclick="toggleSkillFilter(this)">All</button>
+            <button class="filter-btn" data-filter="cultural" onclick="toggleSkillFilter(this)">Cultural</button>
+            <button class="filter-btn" data-filter="religious" onclick="toggleSkillFilter(this)">Religious</button>
+            <button class="filter-btn" data-filter="technical" onclick="toggleSkillFilter(this)">Technical</button>
+            <button class="filter-btn" data-filter="creative" onclick="toggleSkillFilter(this)">Creative</button>
+            <button class="filter-btn" data-filter="practical" onclick="toggleSkillFilter(this)">Practical</button>
+                    <button class="filter-btn" data-filter="others" onclick="toggleSkillFilter(this)">Others</button>
+</div>
+
+        <h3 class="mb-3">What skills are you offering to teach?</h3>
+        <div class="grid grid-2" id="offeringGrid">
+            <div class="card empty-state">
+                <h3>No skill offers yet</h3>
+                <p class="mb-2">Create a post to offer a skill.</p>
+            </div>
+
+
+        </div>
+
+        <h3 class="mb-3 mt-4">What skills are you seeking?</h3>
+        <div class="grid grid-2" id="seekingGrid">
+            <div class="card empty-state">
+                <h3>No skill requests yet</h3>
+                <p class="mb-2">Create a post to request help learning a skill.</p>
+            </div>
+
+
+        </div>
+ 
+
+
+<template id="skillswap-card-template">
+    <div class="card skill-card">
+        <div class="card-top">
+            <span class="type-badge badge-offering">Offering</span>
+        </div>
+
+        <h3 class="card-title"></h3>
+
+        <div class="card-meta"></div>
+
+        <div class="pill-row">
+            <span class="pill"></span>
+        </div>
+
+        <p class="card-body-text"></p>
+
+        <div class="card-actions">
+            <button class="btn btn-primary skill-message-btn" type="button" onclick="skillswapApp.message(this)">Message</button>
+        </div>
+    </div>
+</template>
+
+    </main>
+
+    <!-- SkillSwap creation is DB-backed; route to the form instead of using JS prompts. -->
+    <button id="floating-add-btn" class="floating-btn" onclick="window.location.href='skillswapform.html'" style="display: flex;">+</button>
+    <script src="js/classes/StateManager.js"></script>
+    <script src="js/classes/ModeToggle.js"></script>
+    <script src="js/classes/AccessibilityManager.js"></script>
+    <script src="js/classes/SettingsManager.js"></script>
+    <script src="js/classes/NotificationManager.js"></script>
+    <script src="js/classes/ProfileManager.js"></script>
+    <script src="js/classes/NavigationManager.js"></script>
+    <script src="js/classes/FilterManager.js"></script>
+    <script src="js/classes/GenerationBridgeApp.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

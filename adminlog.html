@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - GenerationBridge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="youth-mode">
+    
+    <div class="mode-toggle-corner">
+        <div class="mode-toggle" onclick="toggleMode()">
+            <span class="mode-label">Youth</span>
+            <div class="toggle-switch">
+                <div class="toggle-slider"></div>
+            </div>
+            <span class="mode-label">Senior</span>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="logo-header">
+                <a href="adminhome.html" class="logo">GenerationBridge Admin</a>
+            </div>
+
+            <h1>Admin Access</h1>
+            <p class="subtitle">Secure admin portal login</p>
+
+            <div class="error-message" id="adminErrorMessage"></div>
+
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+                <div class="form-group">
+                    <label for="adminEmail">Admin Email</label>
+                    <input type="email" id="adminEmail" name="adminEmail" required placeholder="Enter admin email">
+                </div>
+
+                <div class="form-group">
+                    <label for="adminPassword">Admin Password</label>
+                    <input type="password" id="adminPassword" name="adminPassword" required placeholder="Enter admin password">
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-btn">Admin Login</button>
+            </form>
+
+            <div class="switch-auth">
+                <a href="login.html">Back to user login</a>
+            </div>
+        </div>
+    </div>
+    <script src="js/classes/StateManager.js"></script>
+    <script src="js/classes/ModeToggle.js"></script>
+    <script src="js/classes/AccessibilityManager.js"></script>
+    <script src="js/classes/SettingsManager.js"></script>
+    <script src="js/classes/GenerationBridgeApp.js"></script>
+    <script src="admin.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

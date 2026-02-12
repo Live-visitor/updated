@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Event - GenerationBridge Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="youth-mode" data-page="eventsform">
+  <div class="mode-toggle-corner">
+    <div class="mode-toggle" onclick="toggleMode()">
+      <span class="mode-label">Youth</span>
+      <div class="toggle-switch">
+        <div class="toggle-slider"></div>
+      </div>
+      <span class="mode-label">Senior</span>
+    </div>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="logo-header">
+        <a href="adminevents.html" class="logo">GenerationBridge</a>
+      </div>
+
+      <h1>Create Event</h1>
+      <p class="subtitle">Add an event to show on the public Events page.</p>
+
+      <div class="error-message" id="errorMessage"></div>
+      <div class="success-message" id="successMessage"></div>
+
+      <form id="AdminEventForm" onsubmit="handleAdminCreateEvent(event)">
+        <div class="form-group">
+          <label for="eventTitle">Event Title</label>
+          <input type="text" id="eventTitle" name="eventTitle" required />
+        </div>
+
+        <div class="form-group">
+          <label for="eventDetails">Event Details</label>
+          <textarea id="eventDetails" name="eventDetails" rows="4" placeholder="What is this event about?"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Date, Month, Year and Time</label>
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <input type="number" id="eventDay" name="eventDay" min="1" max="31" placeholder="Day" required style="flex:1; min-width:90px;" />
+            <select id="eventMonth" name="eventMonth" required style="flex:1; min-width:140px;">
+              <option value="">Month</option>
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+            <input type="number" id="eventYear" name="eventYear" min="2000" max="2100" placeholder="Year" required style="flex:1; min-width:110px;" />
+            <input type="time" id="eventTime" name="eventTime" style="flex:1; min-width:130px;" />
+          </div>
+          <p style="font-size: 0.85rem; margin-top: 0.5rem; opacity: 0.8;">
+            The Events page will display the date automatically in a friendly format.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="eventLocation">Location (optional)</label>
+          <input type="text" id="eventLocation" name="eventLocation" placeholder="e.g., Community Centre / Zoom" />
+        </div>
+
+        <div class="form-group">
+          <label for="eventLatitude">Latitude (optional)</label>
+          <input type="number" id="eventLatitude" name="eventLatitude" step="any" placeholder="e.g., 1.3521" />
+        </div>
+
+        <div class="form-group">
+          <label for="eventLongitude">Longitude (optional)</label>
+          <input type="number" id="eventLongitude" name="eventLongitude" step="any" placeholder="e.g., 103.8198" />
+        </div>
+
+        <div class="form-group">
+          <label for="eventLink">Event Link (optional)</label>
+          <input type="url" id="eventLink" name="eventLink" placeholder="e.g., https://zoom.us/j/123456789" />
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-btn">Post</button>
+      </form>
+
+      <div class="switch-auth">
+        Back to Admin Events? <a href="adminevents.html">Go to Admin Events</a>
+      </div>
+    </div>
+  </div>
+
+  
+  <script src="js/classes/StateManager.js"></script>
+  <script src="js/classes/ModeToggle.js"></script>
+  <script src="js/classes/AccessibilityManager.js"></script>
+  <script src="js/classes/SettingsManager.js"></script>
+  <script src="js/classes/GenerationBridgeApp.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    function pad2(n) {
+      return String(n || '').padStart(2, '0');
+    }
+
+    async function handleAdminCreateEvent(event) {
+      event.preventDefault();
+
+      const errorEl = document.getElementById('errorMessage');
+      const successEl = document.getElementById('successMessage');
+      if (errorEl) errorEl.textContent = '';
+      if (successEl) successEl.textContent = '';
+
+      const title = (document.getElementById('eventTitle')?.value || '').trim();
+      const description = (document.getElementById('eventDetails')?.value || '').trim();
+      const location = (document.getElementById('eventLocation')?.value || '').trim();
+      const latitude = (document.getElementById('eventLatitude')?.value || '').trim();
+      const longitude = (document.getElementById('eventLongitude')?.value || '').trim();
+      const link = (document.getElementById('eventLink')?.value || '').trim();
+
+      const day = (document.getElementById('eventDay')?.value || '').trim();
+      const month = (document.getElementById('eventMonth')?.value || '').trim();
+      const year = (document.getElementById('eventYear')?.value || '').trim();
+      const time = (document.getElementById('eventTime')?.value || '').trim(); // HH:MM
+
+      if (!title || !day || !month || !year) {
+        if (errorEl) errorEl.textContent = 'Please fill in Event Title and a valid Date (Day/Month/Year).';
+        return;
+      }
+
+      const dNum = Number(day);
+      const mNum = Number(month);
+      const yNum = Number(year);
+
+      if (!Number.isFinite(dNum) || !Number.isFinite(mNum) || !Number.isFinite(yNum) || dNum < 1 || dNum > 31 || mNum < 1 || mNum > 12) {
+        if (errorEl) errorEl.textContent = 'Please enter a valid Day/Month/Year.';
+        return;
+      }
+
+      const start_date = `${yNum}-${pad2(mNum)}-${pad2(dNum)}`;
+      const start_time = time || null;
+
+      // Prepare latitude and longitude
+      const lat = latitude ? parseFloat(latitude) : null;
+      const lng = longitude ? parseFloat(longitude) : null;
+
+      try {
+        const res = await fetch('/api/admin/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title,
+            description,
+            location,
+            start_date,
+            start_time,
+            latitude: lat,
+            longitude: lng,
+            link
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data?.ok) {
+          if (data?.error === 'auth_required') {
+            window.location.href = 'adminlog.html?next=eventsform.html';
+            return;
+          }
+          if (data?.error === 'admin_required') {
+            window.location.href = 'adminlog.html?next=eventsform.html';
+            return;
+          }
+          if (data?.error === 'invalid_date') {
+            if (errorEl) errorEl.textContent = 'Invalid date format. Please try again.';
+            return;
+          }
+          if (errorEl) errorEl.textContent = 'Unable to create event. Please try again.';
+          return;
+        }
+
+        if (successEl) successEl.textContent = 'Event created. Redirecting to Admin Events...';
+        window.location.href = 'adminevents.html';
+      } catch (e) {
+        if (errorEl) errorEl.textContent = 'Network error. Please try again.';
+      }
+    }
+  </script>
+</body>
+</html>

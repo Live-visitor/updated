@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create SkillSwap - GenerationBridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="youth-mode" data-page="create-skill">
+  <div class="mode-toggle-corner">
+    <div class="mode-toggle" onclick="toggleMode()">
+      <span class="mode-label">Youth</span>
+      <div class="toggle-switch">
+        <div class="toggle-slider"></div>
+      </div>
+      <span class="mode-label">Senior</span>
+    </div>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="logo-header">
+        <a href="skillswap.html" class="logo">GenerationBridge</a>
+      </div>
+
+      <h1>Create SkillSwap</h1>
+      <p class="subtitle">Create an Offering or Seeking post for SkillSwap</p>
+
+      <div class="error-message" id="errorMessage"></div>
+      <div class="success-message" id="successMessage"></div>
+
+      <!-- Reused "signup" form layout, repurposed for SkillSwap -->
+      <form id="skillPostForm" onsubmit="handleCreateSkill(event)">
+        <div class="form-group">
+          <label for="postType">Post Type</label>
+          <select id="postType" name="postType" required>
+            <option value="">Select post type</option>
+            <option value="offering">Offering (I can teach)</option>
+            <option value="seeking">Seeking (I want to learn)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="skillTitle">Skill Title</label>
+          <input
+            type="text"
+            id="skillTitle"
+            name="skillTitle"
+            required
+            placeholder="e.g., Basic Cooking, Smartphone Tips, Guitar Chords"
+          />
+        </div>
+
+        <!-- Requirement: SkillSwap user-created posts must only be in the Cultural category. -->
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" name="category" required>
+            <option value="cultural" selected>Cultural</option>
+            <option value="religious">Religious</option>
+            <option value="technical">Technical</option>
+            <option value="creative">Creative</option>
+            <option value="practical">Practical</option>
+            <option value="others">Others</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            required
+            placeholder="Describe what you're offering or what you need help with..."
+            rows="4"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="availability">Availability</label>
+          <input
+            type="text"
+            id="availability"
+            name="availability"
+            placeholder="e.g., Weekends, Tue evenings, Flexible"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="mode">Mode</label>
+          <select id="mode" name="mode">
+            <option value="">Select mode (optional)</option>
+            <option value="online">Online</option>
+            <option value="in_person">In-person</option>
+            <option value="either">Either</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-btn">Post</button>
+      </form>
+
+      <div class="switch-auth">
+        Back to SkillSwap? <a href="skillswap.html">Go to SkillSwap</a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Keep your existing app scripts -->
+  <script src="js/classes/StateManager.js"></script>
+  <script src="js/classes/ModeToggle.js"></script>
+  <script src="js/classes/AccessibilityManager.js"></script>
+  <script src="js/classes/SettingsManager.js"></script>
+  <script src="js/classes/GenerationBridgeApp.js"></script>
+  <script src="script.js"></script>
+
+  <!-- DB-backed handler (POST -> /api/skillswap). -->
+  <script>
+    async function handleCreateSkill(event) {
+      event.preventDefault();
+
+      const errorEl = document.getElementById('errorMessage');
+      const successEl = document.getElementById('successMessage');
+      if (errorEl) errorEl.textContent = '';
+      if (successEl) successEl.textContent = '';
+
+      const postType = (document.getElementById('postType')?.value || '').trim();
+      const title = (document.getElementById('skillTitle')?.value || '').trim();
+      // Enforced in UI: Cultural only.
+      const category = 'cultural';
+      const descriptionRaw = (document.getElementById('description')?.value || '').trim();
+      const availability = (document.getElementById('availability')?.value || '').trim();
+      const mode = (document.getElementById('mode')?.value || '').trim();
+
+      if (!postType || !title || !descriptionRaw) {
+        if (errorEl) errorEl.textContent = 'Please fill in Post Type, Skill Title, and Description.';
+        return;
+      }
+
+      // Persist optional fields by appending them to the description (schema stays simple).
+      let description = descriptionRaw;
+      if (availability) description += `\n\nAvailability: ${availability}`;
+      if (mode) description += `\nMode: ${mode}`;
+
+      try {
+        const res = await fetch('/api/skillswap', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post_type: postType, title, category, description })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data?.ok) {
+          if (data?.error === 'auth_required') {
+            // Must be logged in to post.
+            window.location.href = 'login.html?next=skillswapform.html';
+            return;
+          }
+          if (errorEl) errorEl.textContent = 'Unable to create post. Please try again.';
+          return;
+        }
+
+        if (successEl) successEl.textContent = 'Post created. Redirecting to SkillSwap...';
+        window.location.href = 'skillswap.html';
+      } catch (e) {
+        if (errorEl) errorEl.textContent = 'Network error. Please try again.';
+      }
+    }
+  </script>
+</body>
+</html>
