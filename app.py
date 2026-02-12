@@ -8,30 +8,20 @@ app = Flask(__name__, static_folder='.', static_url_path='')
 def index():
     return send_from_directory('.', 'index.html')
 
+# Redirect .html URLs to clean URLs
+@app.route('/<path:path>.html')
+def redirect_html(path):
+    """Redirect /page.html to /page"""
+    return redirect('/' + path, code=301)
+
 # Serve pages with or without .html
 @app.route('/<path:path>')
 def serve_page(path):
-    # Check if URL ends with .html
-    if path.endswith('.html'):
-        # Remove .html and redirect to clean URL
-        clean_path = path[:-5]  # Remove last 5 characters (.html)
-        return redirect('/' + clean_path, code=301)
-    
     # If path doesn't have extension, add .html
     if '.' not in path.split('/')[-1]:
         file_path = path + '.html'
     else:
         file_path = path
-
-    # Try to serve the file
-    try:
-        return send_from_directory('.', file_path)
-    except:
-        # If file not found, redirect to error page
-        if path != 'error':  # Prevent loop if error.html doesn't exist
-            return redirect('/error', code=302)
-        else:
-            return "Page not found", 404
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5010, debug=True, threaded=True)
