@@ -1,54 +1,89 @@
-from flask import Flask, send_from_directory, redirect
+from flask import Flask, send_from_directory, request, redirect, jsonify
+import sqlite3
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=".", static_url_path="")
 
-# Get the directory where files are located
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = "app.db"
 
-# Serve index.html at root
-@app.route('/')
-def index():
-    try:
-        return send_from_directory(BASE_DIR, 'index.html')
-    except:
-        return "index.html not found. Please make sure it's in the same folder as app.py", 404
 
-# Serve pages with or without .html
-@app.route('/<path:path>')
-def serve_page(path):
-    # Check if URL ends with .html
-    if path.endswith('.html'):
-        # Remove .html and redirect to clean URL
-        clean_path = path[:-5]
-        return redirect('/' + clean_path, code=301)
-    
-    # Handle different file types
-    if '.' in path.split('/')[-1]:
-        # It's a file with extension (CSS, JS, images, etc.)
-        file_path = path
+# ======================
+# DATABASE FUNCTIONS
+# ======================
+
+def get_db_connection():
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def query_db(query, params=(), fetch=False):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(query, params)
+    if fetch:
+        results = cur.fetchall()
     else:
-        # It's a page without extension, add .html
-        file_path = path + '.html'
-    
-    # Try to serve the file
-    try:
-        return send_from_directory(BASE_DIR, file_path)
-    except FileNotFoundError:
-        # If file not found and it's not already error page, redirect to error
-        if path != 'error':
-            try:
-                return send_from_directory(BASE_DIR, 'error.html'), 404
-            except:
-                return f"404 - Page not found: {path}", 404
-        else:
-            return "404 - Error page not found", 404
-    except Exception as e:
-        return f"Error loading page: {str(e)}", 500
+        results = None
+    conn.commit()
+    conn.close()
+    return results
 
-# Run the app
+# ======================
+# STATIC HTML ROUTES
+# ======================
+
+@app.route("/")
+def index():
+    return send_from_directory(".", "index.html")
+
+@app.route("/<path:path>.html")
+def redirect_html(path):
+    """Redirect /page.html → /page"""
+    return redirect("/" + path, code=301)
+
+@app.route("/<path:path>")
+def serve_page(path):
+    # ignore API routes
+    if path.startswith("api/"):
+        return "Not found", 404
+
+    # add .html automatically
+    if "." not in path.split("/")[-1]:
+        path += ".html"
+
+    try:
+        return send_from_directory(".", path)
+    except:
+        try:
+            return send_from_directory(".", "error.html"), 404
+        except:
+            return "Page not found", 404
+
+# ======================
+# BACKEND / DATABASE APIs
+# ======================
+
+# Example: add a user
+@app.route("/api/users", methods=["POST"])
+def add_user():
+    data = request.json
+    name = data.get("name")
+    if not name:
+        return {"status": "error", "message": "Name is required"}, 400
+
+    query_db("INSERT INTO users (name) VALUES (?)", (name,))
+    return {"status": "success"}
+
+# Example: get all users
+@app.route("/api/users", methods=["GET"])
+def get_users():
+    rows = query_db("SELECT * FROM users", fetch=True)
+    users = [dict(row) for row in rows]
+    return jsonify(users)
+
+# ======================
+# RUN SERVER
+# ======================
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    print(f"Starting server on port {port}")
-    print(f"Looking for files in: {BASE_DIR}")
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
